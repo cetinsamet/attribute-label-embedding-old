@@ -9,20 +9,17 @@
 # --------------------------------------------------
 
 import random
-random.seed(0)
+random.seed(123)
 
 import numpy as np
 np.random.seed(123)
 
-import scipy.io as sio
-
 import torch
-torch.manual_seed(0)
-torch.cuda.manual_seed(0)
-
+torch.manual_seed(123)
 from torch import nn
 from torch.autograd import Variable
 
+import scipy.io as sio
 from model import Network
 
 

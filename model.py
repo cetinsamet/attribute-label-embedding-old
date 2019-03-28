@@ -9,18 +9,16 @@
 # --------------------------------------------------
 
 import random
-random.seed(0)
+random.seed(123)
 
 import numpy as np
-np.random.seed(0)
+np.random.seed(123)
 
 import torch
-torch.manual_seed(0)
-torch.cuda.manual_seed(0)
+torch.manual_seed(123)
 
 from torch import nn
 import torch.nn.functional as F
-
 
 
 class Network(nn.Module):
@@ -38,3 +36,4 @@ class Network(nn.Module):
         out             = nn.Softmax(dim=1)(torch.matmul(imageFeatures, torch.t(classVectors)))
 
         return out
+        

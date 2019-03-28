@@ -8,13 +8,18 @@
 # March, 2019
 # --------------------------------------------------
 
+import random
+random.seed(0)
+
 import numpy as np
 np.random.seed(123)
 
 import scipy.io as sio
-import pickle
 
 import torch
+torch.manual_seed(0)
+torch.cuda.manual_seed(0)
+
 from torch import nn
 from torch.autograd import Variable
 

@@ -8,9 +8,20 @@
 # March, 2019
 # --------------------------------------------------
 
+import random
+random.seed(0)
+
+import numpy as np
+np.random.seed(0)
+
 import torch
+torch.manual_seed(0)
+torch.cuda.manual_seed(0)
+
 from torch import nn
 import torch.nn.functional as F
+
+
 
 class Network(nn.Module):
 

@@ -1,6 +1,6 @@
-from model import evaluate
-from tools import load_data, map_labels
 from config import MODEL_PATH, MAIN_DATAPATH, VAL_DATAPATH, TEST_DATAPATH
+from tools import load_data, map_labels
+from model import evaluate
 import numpy as np
 import torch
 
@@ -15,7 +15,7 @@ def main():
 
     # ---------------------------------------------------------------------------------------------------------------- #
 
-    n_class, _ = allClassVectors.shape
+    n_class, _          = allClassVectors.shape
 
     seenClassIndices    = np.unique(seenLabels)
     unseenClassIndices  = np.unique(unseenLabels)
@@ -33,7 +33,7 @@ def main():
 
     # ---------------------------------------------------------------------------------------------------------------- #
 
-    model = torch.load(MODEL_PATH)
+    model               = torch.load(MODEL_PATH) # <--- Load model
 
     x_seenFeatures      = torch.from_numpy(seenFeatures).float()
     y_seenLabels        = torch.from_numpy(m_seenLabels).long()
@@ -48,28 +48,28 @@ def main():
     # * ----- * ----- * ----- * ----- * ----- * ----- * ----- *
     # ------------------------------------------------------- #
     # ZERO-SHOT ACCURACY
-    zslAcc = evaluate(model=model,
-                      x=x_unseenFeatures,
-                      y=y_unseenLabels,
-                      vec=unseenVectors)
+    zslAcc = evaluate(model = model,
+                      x     = x_unseenFeatures,
+                      y     = y_unseenLabels,
+                      vec   = unseenVectors)
     print("Zero-Shot acc    : %s" % str(zslAcc))
     # ------------------------------------------------------- #
     # * ----- * ----- * ----- * ----- * ----- * ----- * ----- *
     # ------------------------------------------------------- #
     # GENERALIZED SEEN ACCURACY
-    gSeenAcc = evaluate(model=model,
-                        x=x_seenFeatures,
-                        y=y_genSeenLabels,
-                        vec=allVectors)
+    gSeenAcc = evaluate(model   = model,
+                        x       = x_seenFeatures,
+                        y       = y_genSeenLabels,
+                        vec     = allVectors)
     print("Gen Seen acc     : %s" % str(gSeenAcc))
     # ------------------------------------------------------- #
     # * ----- * ----- * ----- * ----- * ----- * ----- * ----- *
     # ------------------------------------------------------- #
     # GENERALIZED UNSEEN ACCURACY
-    gUnseenAcc = evaluate(model=model,
-                          x=x_unseenFeatures,
-                          y=y_genUnseenLabels,
-                          vec=allVectors)
+    gUnseenAcc = evaluate(model = model,
+                          x     = x_unseenFeatures,
+                          y     = y_genUnseenLabels,
+                          vec   = allVectors)
     print("Gen Unseen acc   : %s" % str(gUnseenAcc))
     # ------------------------------------------------------- #
     # * ----- * ----- * ----- * ----- * ----- * ----- * ----- *
@@ -81,6 +81,7 @@ def main():
     print("##" * 25)
 
     return
+
 
 if __name__ == '__main__':
     main()

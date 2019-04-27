@@ -3,7 +3,6 @@ An Implementation of Attribute Label Embedding (ALE) method for Zero-Shot Learni
 
 First, run data/data_prepare.ipynb script to prepare data. 
 
-There are two phases: validation and test.   
 Validation phase is used for hyper-parameter tuning.   
 **Run $python3 master.py --mode validation**
 

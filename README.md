@@ -1,8 +1,6 @@
 # attribute-label-embedding
 An Implementation of Attribute Label Embedding (ALE) method for Zero-Shot Learning
 
-First, run data/data_prepare.ipynb script to prepare data. 
-
 Validation phase is used for hyper-parameter tuning.   
 **Run $python3 master.py --mode validation**
 

@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+# --------------------------------------------------
+#
+# demo_eval.py
+#
+# Written by cetinsamet -*- cetin.samet@metu.edu.tr
+# April, 2019
+# --------------------------------------------------
 from config import MODEL_PATH, MAIN_DATAPATH, VAL_DATAPATH, TEST_DATAPATH
 from tools import load_data, map_labels
 from model import evaluate

@@ -8,7 +8,6 @@
 # Written by cetinsamet -*- cetin.samet@metu.edu.tr
 # March, 2019
 # --------------------------------------------------
-
 import random
 random.seed(123)
 

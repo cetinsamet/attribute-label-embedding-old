@@ -1,7 +1,7 @@
 # attribute-label-embedding
 An Implementation of Attribute Label Embedding (ALE) method for Zero-Shot Learning
 
-!!! Run **$git lfs pull** to be able to pull data files with '.mat' extension.  
+!!! Run **$git lfs pull** (to download data files with '.mat' extension.  )
   
 Validation phase is used for hyper-parameter tuning.   
 Run **$python3 master.py --mode validation**

@@ -134,7 +134,7 @@ def main():
         runningTrainvalLoss = 0.
         trainvalIndices     = torch.randperm(n_train)
 
-        for batchID in range(n_batch + 1):
+        for batchID in range(n_batch):
 
             batchTrainvalIndices    = trainvalIndices[(batchID * batch_size):((batchID + 1) * batch_size)]
             trainvalLoss            = 0.

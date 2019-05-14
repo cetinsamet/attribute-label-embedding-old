@@ -29,7 +29,7 @@ import pickle
 
 def main():
 
-    print('#####    HYPER-PARAMETER TUNING PHASE    #####')
+    print('#####    VALIDATION PHASE    #####')
 
     __C = edict()
 

@@ -30,7 +30,7 @@ import pickle
 
 def main():
 
-    print('#####    ZERO-SHOT LEARNING PHASE    #####')
+    print('#####    TEST PHASE    #####')
 
     __C = edict()
 

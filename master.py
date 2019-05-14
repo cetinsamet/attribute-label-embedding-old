@@ -20,8 +20,8 @@ def prepareData():
 
     __C = edict()
 
-    __C.LR                  = 3e-3  # <--- Fine-tuned to improve zero-shot accuracy on validation phase
-    __C.BATCH_SIZE          = 64    # <--- Fine-tuned to improve zero-shot accuracy on validation phase
+    __C.LR                  = 3e-3      # <--- Fine-tuned to improve zero-shot accuracy on validation phase
+    __C.BATCH_SIZE          = 64        # <--- Fine-tuned to improve zero-shot accuracy on validation phase
     __C.N_EPOCH             = 1000
     __C.INFO_EPOCH          = 10
 
@@ -64,8 +64,8 @@ if __name__ == '__main__':
         pickle.dump(__C, outfile, pickle.HIGHEST_PROTOCOL)
 
     if args.mode == 'validation':       # <---- Hyper-Parameter Tuning (Validation)
-        subprocess.call('python3 model_tuning.py', shell=True)
+        subprocess.call('python3 validation.py', shell=True)
     elif args.mode == 'test':           # <---- Zero-Shot Learning (Test)
-        subprocess.call('python3 zsl.py', shell=True)
+        subprocess.call('python3 test.py', shell=True)
     else:
         pass

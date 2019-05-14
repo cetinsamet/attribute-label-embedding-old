@@ -180,7 +180,7 @@ def main():
             y_out       = torch.argmax(y_out, dim=1)
             trainScore  = torch.sum(y_out == y_trainvalLabels).item()
             trainAcc    = trainScore / n_train
-            print("Train acc        : %s" % str(trainAcc))
+            print("Train acc              : %s" % str(trainAcc))
             # ------------------------------------------------------- #
             # * ----- * ----- * ----- * ----- * ----- * ----- * ----- *
             # ------------------------------------------------------- #
@@ -189,7 +189,7 @@ def main():
                                     x       = x_unseenFeatures,
                                     y       = y_unseenLabels,
                                     vec     = unseenVectors)
-            print("Zero-Shot acc    : %s" % str(zslAcc))
+            print("Zero-Shot acc          : %s" % str(zslAcc))
             # ------------------------------------------------------- #
             # * ----- * ----- * ----- * ----- * ----- * ----- * ----- *
             # ------------------------------------------------------- #
@@ -198,7 +198,7 @@ def main():
                                     x       = x_seenFeatures,
                                     y       = y_genSeenLabels,
                                     vec     = allVectors)
-            print("Gen Seen acc     : %s" % str(gSeenAcc))
+            print("Generalized Seen acc   : %s" % str(gSeenAcc))
             # ------------------------------------------------------- #
             # * ----- * ----- * ----- * ----- * ----- * ----- * ----- *
             # ------------------------------------------------------- #
@@ -207,13 +207,13 @@ def main():
                                     x       = x_unseenFeatures,
                                     y       = y_genUnseenLabels,
                                     vec     = allVectors)
-            print("Gen Unseen acc   : %s" % str(gUnseenAcc))
+            print("Generalized Unseen acc : %s" % str(gUnseenAcc))
             # ------------------------------------------------------- #
             # * ----- * ----- * ----- * ----- * ----- * ----- * ----- *
             # ------------------------------------------------------- #
             # GENERALIZED ZERO-SHOT ACCURACY
             hScore = (2 * gSeenAcc * gUnseenAcc) / (gSeenAcc + gUnseenAcc)
-            print("Harmonic Mean    : %s" % str(hScore))
+            print("H-Score                : %s" % str(hScore))
             # ------------------------------------------------------- #
 
             print("##" * 25)

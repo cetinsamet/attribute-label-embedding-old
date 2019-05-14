@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 # --------------------------------------------------
 #
-# model_tuning.py
+# validation.py
 #
-# Model tuning of attribute label embedding (ALE) method on APY dataset
+# Validation phase. Model tuning of attribute label embedding (ALE) method on APY dataset
 # 15 seen classes   :   bird - cat - mug - bus - diningtable - bottle - car - boat
 #                       dog - zebra - monkey - centaur - chair - bicycle - building
 # 5 unseen classes  :   aeroplane - wolf - carriage - sofa - bag

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 # --------------------------------------------------
 #
-# zsl.py
+# test.py
 #
-# Training of attribute label embedding (ALE) method on APY dataset
+# Test phase. Training of attribute label embedding (ALE) method on APY dataset
 # 20 seen classes   :   aeroplane - bicycle - bird - boat - bottle - bus - car - cat - chair - dog
 #                       monkey - wolf - zebra - mug - building - bag - carriage - sofa - centaur - diningtable
 # 12 unseen classes :   tvmonitor - goat - motorbike - cow - jetski - train - sheep - statue - horse - person

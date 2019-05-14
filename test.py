@@ -100,7 +100,7 @@ def main():
         n_batch     = (n_train // batch_size) + 1
     else:
         n_batch     = n_train // batch_size
-        lr          = __C.LR
+    lr          = __C.LR
 
     model       = Network(feature_dim=feat_dim, vector_dim=attr_dim)
     optimizer   = torch.optim.Adam(model.parameters(), lr=lr)   # <-- Optimizer

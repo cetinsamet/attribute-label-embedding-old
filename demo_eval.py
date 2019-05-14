@@ -3,6 +3,8 @@
 #
 # demo_eval.py
 #
+# Evaluate performance of ALE model on test set.
+#
 # Written by cetinsamet -*- cetin.samet@metu.edu.tr
 # April, 2019
 # --------------------------------------------------
@@ -15,14 +17,13 @@ import torch
 
 def main():
 
-    allClassVectors     = load_data(MAIN_DATAPATH + '/all_class_vec.mat', 'all_class_vec')
-    seenFeatures        = load_data(TEST_DATAPATH + '/test_seen_features.mat', 'test_seen_features')
-    seenLabels          = load_data(TEST_DATAPATH + '/test_seen_labels.mat', 'test_seen_labels')
-    unseenFeatures      = load_data(TEST_DATAPATH + '/test_unseen_features.mat', 'test_unseen_features')
-    unseenLabels        = load_data(TEST_DATAPATH + '/test_unseen_labels.mat', 'test_unseen_labels')
+    allClassVectors     = load_data(MAIN_DATAPATH + '/all_class_vec.mat',           'all_class_vec')
+    seenFeatures        = load_data(TEST_DATAPATH + '/test_seen_features.mat',      'test_seen_features')
+    seenLabels          = load_data(TEST_DATAPATH + '/test_seen_labels.mat',        'test_seen_labels')
+    unseenFeatures      = load_data(TEST_DATAPATH + '/test_unseen_features.mat',    'test_unseen_features')
+    unseenLabels        = load_data(TEST_DATAPATH + '/test_unseen_labels.mat',      'test_unseen_labels')
 
     # ---------------------------------------------------------------------------------------------------------------- #
-
     n_class, _          = allClassVectors.shape
 
     seenClassIndices    = np.unique(seenLabels)
@@ -52,6 +53,8 @@ def main():
     y_genUnseenLabels   = torch.from_numpy(m_genUnseenLabels).long()
 
     print("##" * 25)
+    print("#" * 10 + "  Attribute Label Embedding   " + "#" * 10)
+    print("##" * 25)
     # ------------------------------------------------------- #
     # * ----- * ----- * ----- * ----- * ----- * ----- * ----- *
     # ------------------------------------------------------- #
@@ -60,7 +63,7 @@ def main():
                       x     = x_unseenFeatures,
                       y     = y_unseenLabels,
                       vec   = unseenVectors)
-    print("Zero-Shot acc    : %s" % str(zslAcc))
+    print("Zero-Shot acc          : %s" % str(zslAcc))
     # ------------------------------------------------------- #
     # * ----- * ----- * ----- * ----- * ----- * ----- * ----- *
     # ------------------------------------------------------- #
@@ -69,7 +72,7 @@ def main():
                         x       = x_seenFeatures,
                         y       = y_genSeenLabels,
                         vec     = allVectors)
-    print("Gen Seen acc     : %s" % str(gSeenAcc))
+    print("Generalized Seen acc   : %s" % str(gSeenAcc))
     # ------------------------------------------------------- #
     # * ----- * ----- * ----- * ----- * ----- * ----- * ----- *
     # ------------------------------------------------------- #
@@ -78,13 +81,13 @@ def main():
                           x     = x_unseenFeatures,
                           y     = y_genUnseenLabels,
                           vec   = allVectors)
-    print("Gen Unseen acc   : %s" % str(gUnseenAcc))
+    print("Generalized Unseen acc : %s" % str(gUnseenAcc))
     # ------------------------------------------------------- #
     # * ----- * ----- * ----- * ----- * ----- * ----- * ----- *
     # ------------------------------------------------------- #
     # GENERALIZED ZERO-SHOT ACCURACY
     hScore = (2 * gSeenAcc * gUnseenAcc) / (gSeenAcc + gUnseenAcc)
-    print("Harmonic Mean    : %s" % str(hScore))
+    print("H-Score                : %s" % str(hScore))
     # ------------------------------------------------------- #
     print("##" * 25)
 

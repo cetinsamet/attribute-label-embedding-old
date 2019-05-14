@@ -36,7 +36,7 @@ def main():
     with open(OBJPATH, 'rb') as infile:
         __C = pickle.load(infile)
 
-    # ---------------------------------------------------------------------------------------------------------------- #
+    # --------------------------------------------------------------------------------------------------------------- #
 
     allClassVectors = load_data(__C.ALL_CLASS_VEC,          'all_class_vec')
 
@@ -62,7 +62,7 @@ def main():
     print("Unseen Labels            : ", unseenLabels.shape)
     print("##" * 25)
 
-    # ---------------------------------------------------------------------------------------------------------------- #
+    # --------------------------------------------------------------------------------------------------------------- #
 
     n_class, attr_dim   = allClassVectors.shape
     n_train, feat_dim   = trainFeatures.shape
@@ -79,7 +79,7 @@ def main():
     print("Feature Dim              : ", feat_dim)
     print("##" * 25)
 
-    # ---------------------------------------------------------------------------------------------------------------- #
+    # --------------------------------------------------------------------------------------------------------------- #
 
     seenClassIndices    = np.unique(trainLabels)
     unseenClassIndices  = np.unique(unseenLabels)
@@ -92,19 +92,21 @@ def main():
     m_unseenLabels      = map_labels(unseenLabels, n_class, unseenClassIndices)
     m_genUnseenLabels   = unseenLabels.flatten()
 
-    # ---------------------------------------------------------------------------------------------------------------- #
+    # --------------------------------------------------------------------------------------------------------------- #
 
     n_epoch     = __C.N_EPOCH
     batch_size  = __C.BATCH_SIZE
-    n_batch     = n_train // batch_size
-    offset      = n_train - (batch_size * n_batch)
+    if n_train % batch_size != 0:
+        n_batch     = (n_train // batch_size) + 1
+    else:
+        n_batch     = n_train // batch_size
     lr          = __C.LR
 
     model       = Network(feature_dim=feat_dim, vector_dim=attr_dim)
     optimizer   = torch.optim.Adam(model.parameters(), lr=lr)   # <-- Optimizer
     criterion   = torch.nn.CrossEntropyLoss(reduction='sum')    # <-- Loss Function
 
-    # ---------------------------------------------------------------------------------------------------------------- #
+    # --------------------------------------------------------------------------------------------------------------- #
 
     seenVectors     = torch.from_numpy(allClassVectors[seenClassIndices, :]).float()
     unseenVectors   = torch.from_numpy(allClassVectors[unseenClassIndices, :]).float()
@@ -119,8 +121,8 @@ def main():
     x_train = torch.from_numpy(trainFeatures).float()
     y_train = torch.from_numpy(m_trainLabels).long()
 
-    # **************************************************************************************************************** #
-    # **************************************************************************************************************** #
+    # *************************************************************************************************************** #
+    # *************************************************************************************************************** #
 
     for epochID in range(n_epoch):
 
@@ -133,13 +135,11 @@ def main():
         runningTrainLoss    = 0.
         trainIndices        = torch.randperm(n_train)
 
-        for batchID in range(n_batch + 1):
+        for batchID in range(n_batch):
 
             batchTrainIndices   = trainIndices[(batchID * batch_size):((batchID + 1) * batch_size)]
             trainLoss           = 0.
-
-            optimizer.zero_grad()
-
+            
             for index in batchTrainIndices:
 
                 x_sample = x_train[index:(index + 1)]
@@ -148,6 +148,7 @@ def main():
                 y_out       = model(x_sample, seenVectors)
                 trainLoss   += criterion(y_out, y_sample)
 
+            optimizer.zero_grad()
             trainLoss.backward()    # <-- calculate gradients
             optimizer.step()        # <-- update weights
 

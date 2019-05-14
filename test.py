@@ -79,7 +79,7 @@ def main():
     print("Feature Dim                  : ", feat_dim)
     print("##" * 25)
 
-    # ---------------------------------------------------------------------------------------------------------------- #
+    # --------------------------------------------------------------------------------------------------------------- #
 
     seenClassIndices    = np.unique(trainvalLabels)
     unseenClassIndices  = np.unique(unseenLabels)
@@ -92,18 +92,21 @@ def main():
     m_unseenLabels      = map_labels(unseenLabels, n_class, unseenClassIndices)
     m_genUnseenLabels   = unseenLabels.flatten()
 
-    # ---------------------------------------------------------------------------------------------------------------- #
+    # --------------------------------------------------------------------------------------------------------------- #
 
     n_epoch     = __C.N_EPOCH
     batch_size  = __C.BATCH_SIZE
-    n_batch     = n_train // batch_size
-    lr          = __C.LR
+    if n_train % batch_size != 0:
+        n_batch     = (n_train // batch_size) + 1
+    else:
+        n_batch     = n_train // batch_size
+        lr          = __C.LR
 
     model       = Network(feature_dim=feat_dim, vector_dim=attr_dim)
     optimizer   = torch.optim.Adam(model.parameters(), lr=lr)   # <-- Optimizer
     criterion   = torch.nn.CrossEntropyLoss(reduction='sum')    # <-- Loss Function
 
-    # ---------------------------------------------------------------------------------------------------------------- #
+    # --------------------------------------------------------------------------------------------------------------- #
 
     seenVectors     = torch.from_numpy(allClassVectors[seenClassIndices, :]).float()
     unseenVectors   = torch.from_numpy(allClassVectors[unseenClassIndices, :]).float()
@@ -118,8 +121,8 @@ def main():
     x_train = torch.from_numpy(trainvalFeatures).float()
     y_train = torch.from_numpy(m_trainvalLabels).long()
 
-    # **************************************************************************************************************** #
-    # **************************************************************************************************************** #
+    # *************************************************************************************************************** #
+    # *************************************************************************************************************** #
     for epochID in range(n_epoch):
 
         model.train()       # <-- Train Mode On

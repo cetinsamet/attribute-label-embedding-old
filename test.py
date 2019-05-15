@@ -21,6 +21,7 @@ np.random.seed(123)
 import torch
 torch.manual_seed(123)
 
+from torch.utils.data import TensorDataset, DataLoader
 from easydict import EasyDict as edict
 from tools import load_data, map_labels
 from model import Network, evaluate
@@ -32,6 +33,7 @@ def main():
 
     print('#####    TEST PHASE    #####')
 
+    # read data
     __C = edict()
 
     with open(OBJPATH, 'rb') as infile:
@@ -39,6 +41,7 @@ def main():
 
     # ---------------------------------------------------------------------------------------------------------------- #
 
+    #load data
     allClassVectors     = load_data(__C.ALL_CLASS_VEC,          'all_class_vec')
 
     trainvalFeatures    = load_data(__C.TRAINVAL_FEATURES,      'trainval_features')
@@ -65,6 +68,7 @@ def main():
 
     # ---------------------------------------------------------------------------------------------------------------- #
 
+    # get data information
     n_class, attr_dim   = allClassVectors.shape
     n_train, feat_dim   = trainvalFeatures.shape
     n_seen, _           = seenFeatures.shape
@@ -94,23 +98,33 @@ def main():
 
     # --------------------------------------------------------------------------------------------------------------- #
 
+    # set network hyper-parameters
     n_epoch     = __C.N_EPOCH
     batch_size  = __C.BATCH_SIZE
-    if n_train % batch_size != 0:
-        n_batch     = (n_train // batch_size) + 1
-    else:
-        n_batch     = n_train // batch_size
     lr          = __C.LR
 
+    # set network architecture, optimizer and loss function
     model       = Network(feature_dim=feat_dim, vector_dim=attr_dim)
     optimizer   = torch.optim.Adam(model.parameters(), lr=lr)   # <-- Optimizer
     criterion   = torch.nn.CrossEntropyLoss(reduction='sum')    # <-- Loss Function
 
     # --------------------------------------------------------------------------------------------------------------- #
 
-    seenVectors     = torch.from_numpy(allClassVectors[seenClassIndices, :]).float()
-    unseenVectors   = torch.from_numpy(allClassVectors[unseenClassIndices, :]).float()
-    allVectors      = torch.from_numpy(allClassVectors).float()
+    # convert data from numpy arrays to pytorch tensors
+    x_trainvalFeatures  = torch.from_numpy(trainvalFeatures).float()
+    y_trainvalLabels    = torch.from_numpy(m_trainvalLabels).long()
+
+    x_seenFeatures      = torch.from_numpy(seenFeatures).float()
+    y_seenLabels        = torch.from_numpy(m_seenLabels).long()
+    y_genSeenLabels     = torch.from_numpy(m_genSeenLabels).long()
+
+    x_unseenFeatures    = torch.from_numpy(unseenFeatures).float()
+    y_unseenLabels      = torch.from_numpy(m_unseenLabels).long()
+    y_genUnseenLabels   = torch.from_numpy(m_genUnseenLabels).long()
+
+    seenVectors         = torch.from_numpy(allClassVectors[seenClassIndices, :]).float()
+    unseenVectors       = torch.from_numpy(allClassVectors[unseenClassIndices, :]).float()
+    allVectors          = torch.from_numpy(allClassVectors).float()
 
     print("##" * 25)
     print("Seen Vector shape            : ", tuple(seenVectors.size()))
@@ -118,65 +132,49 @@ def main():
     print("All Vector shape             : ", tuple(allVectors.size()))
     print("##" * 25)
 
-    x_train = torch.from_numpy(trainvalFeatures).float()
-    y_train = torch.from_numpy(m_trainvalLabels).long()
+    # initialize data loader
+    trainvalData    = TensorDataset(x_trainvalFeatures, y_trainvalLabels)
+    trainvalLoader  = DataLoader(trainvalData, batch_size=batch_size, shuffle=True)
 
     # *************************************************************************************************************** #
     # *************************************************************************************************************** #
+
+    # -------------------- #
+    #       TRAINING       #
+    # -------------------- #
+
     for epochID in range(n_epoch):
 
         model.train()       # <-- Train Mode On
-
-        # ------------------- #
-        #  TRAINING
-        # ------------------- #
-
         runningTrainvalLoss = 0.
-        trainvalIndices     = torch.randperm(n_train)
 
-        for batchID in range(n_batch):
+        for idx, (x, y) in enumerate(trainvalLoader):
 
-            batchTrainvalIndices    = trainvalIndices[(batchID * batch_size):((batchID + 1) * batch_size)]
             trainvalLoss            = 0.
 
+            y_out           = model(x, seenVectors)
+            trainvalLoss    += criterion(y_out, y)
+
             optimizer.zero_grad()
-
-            for index in batchTrainvalIndices:
-
-                x_sample = x_train[index:(index + 1)]
-                y_sample = y_train[index:(index + 1)]
-
-                y_out           = model(x_sample, seenVectors)
-                trainvalLoss    += criterion(y_out, y_sample)
-
             trainvalLoss.backward()     # <-- calculate gradients
             optimizer.step()            # <-- update weights
 
             runningTrainvalLoss += trainvalLoss.item()
 
-        # ------------------- #
-        # PRINT LOSS
-        # ------------------- #
+        # ---------------------- #
+        #       PRINT LOSS       #
+        # ---------------------- #
         print("%s\tTrain Loss: %s" % (str(epochID + 1), str(runningTrainvalLoss / n_train)))
-
 
         if (epochID + 1) % __C.INFO_EPOCH == 0:
 
+            # ---------------------- #
+            #       EVALUATION       #
+            # ---------------------- #
+
+            model.eval()  # <-- Evaluation Mode On
+
             print("##" * 25)
-
-            model.eval()        # <-- Evaluation Mode On
-
-            x_trainvalFeatures  = torch.from_numpy(trainvalFeatures).float()
-            y_trainvalLabels    = torch.from_numpy(m_trainvalLabels).long()
-
-            x_seenFeatures      = torch.from_numpy(seenFeatures).float()
-            y_seenLabels        = torch.from_numpy(m_seenLabels).long()
-            y_genSeenLabels     = torch.from_numpy(m_genSeenLabels).long()
-
-            x_unseenFeatures    = torch.from_numpy(unseenFeatures).float()
-            y_unseenLabels      = torch.from_numpy(m_unseenLabels).long()
-            y_genUnseenLabels   = torch.from_numpy(m_genUnseenLabels).long()
-
             # ------------------------------------------------------- #
             # TRAIN ACCURACY
             y_out       = model(x_trainvalFeatures, seenVectors)
@@ -218,7 +216,6 @@ def main():
             hScore = (2 * gSeenAcc * gUnseenAcc) / (gSeenAcc + gUnseenAcc)
             print("H-Score                : %s" % str(hScore))
             # ------------------------------------------------------- #
-
             print("##" * 25)
 
     return

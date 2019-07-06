@@ -1,5 +1,0 @@
-building
-bird
-bicycle
-cat
-centaur

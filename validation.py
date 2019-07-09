@@ -30,7 +30,7 @@ import pickle
 
 def main():
 
-    print('#####    VALIDATION PHASE    #####')
+    #print('#####    VALIDATION PHASE    #####')
 
     # read data
     __C = edict()
@@ -51,7 +51,7 @@ def main():
 
     unseenFeatures  = load_data(__C.VAL_UNSEEN_FEATURES,    'val_unseen_features')
     unseenLabels    = load_data(__C.VAL_UNSEEN_LABELS,      'val_unseen_labels')
-
+    '''
     print("##" * 25)
     print("All Class Vectors        : ", allClassVectors.shape)
 
@@ -64,7 +64,7 @@ def main():
     print("Unseen Features          : ", unseenFeatures.shape)
     print("Unseen Labels            : ", unseenLabels.shape)
     print("##" * 25)
-
+    '''
     # --------------------------------------------------------------------------------------------------------------- #
 
     # get data information
@@ -72,7 +72,7 @@ def main():
     n_train, feat_dim   = trainFeatures.shape
     n_seen, _           = seenFeatures.shape
     n_unseen, _         = unseenFeatures.shape
-
+    '''
     print("##" * 25)
     print("Number of Train samples  : ", n_train)
     print("Number of Seen samples   : ", n_seen)
@@ -81,7 +81,7 @@ def main():
     print("Vector Dim               : ", attr_dim)
     print("Feature Dim              : ", feat_dim)
     print("##" * 25)
-
+    '''
     # --------------------------------------------------------------------------------------------------------------- #
 
     seenClassIndices    = np.unique(trainLabels)
@@ -124,19 +124,25 @@ def main():
     seenVectors         = torch.from_numpy(allClassVectors[seenClassIndices, :]).float()
     unseenVectors       = torch.from_numpy(allClassVectors[unseenClassIndices, :]).float()
     allVectors          = torch.from_numpy(allClassVectors).float()
-
+    '''
     print("##" * 25)
     print("Seen Vector shape        : ", tuple(seenVectors.size()))
     print("Unseen Vector shape      : ", tuple(unseenVectors.size()))
     print("All Vector shape         : ", tuple(allVectors.size()))
     print("##" * 25)
-
+    '''
     # initialize data loader
     trainData 	= TensorDataset(x_trainFeatures, y_trainLabels)
     trainLoader = DataLoader(trainData, batch_size=batch_size, shuffle=True)
 
-    # *************************************************************************************************************** #
-    # *************************************************************************************************************** #
+    # **************************************************************************************************************** #
+    #                                            ATTRIBUTE LABEL EMBEDDING                                             #
+    # **************************************************************************************************************** #
+
+    max_zslAcc      = float('-inf')
+    max_gSeenAcc    = float('-inf')
+    max_gUnseenAcc  = float('-inf')
+    max_hScore      = float('-inf')
 
     # --------------------- #
     #       TRAINING        #
@@ -145,25 +151,23 @@ def main():
     for epochID in range(n_epoch):
 
         model.train()  # <-- Train Mode On
-        runningTrainLoss = 0.
+        running_train_loss = 0.
 
-        for idx, (x, y) in enumerate(trainLoader):
-
-            trainLoss = 0.
+        for x, y in trainLoader:
 
             y_out       = model(x, seenVectors)
-            trainLoss   += criterion(y_out, y)
+            train_loss  = criterion(y_out, y)
 
-            optimizer.zero_grad()
-            trainLoss.backward()    # <-- calculate gradients
+            optimizer.zero_grad()   # <-- set gradients to zero
+            train_loss.backward()   # <-- calculate gradients
             optimizer.step()        # <-- update weights
 
-            runningTrainLoss += trainLoss.item()
+            running_train_loss += train_loss.item()
 
         # ---------------------- #
         #       PRINT LOSS       #
         # ---------------------- #
-        print("%s\tTrain Loss: %s" % (str(epochID + 1), str(runningTrainLoss / n_train)))
+        #print("%s\tTrain Loss: %s" % (str(epochID + 1), str(running_train_loss  / n_train)))
 
         if (epochID + 1) % __C.INFO_EPOCH == 0:
 
@@ -173,14 +177,14 @@ def main():
 
             model.eval()  # <-- Evaluation Mode On
 
-            print("##" * 25)
+            #print("##" * 25)
             # ------------------------------------------------------- #
             # TRAIN ACCURACY
             y_out       = model(x_trainFeatures, seenVectors)
             y_out       = torch.argmax(y_out, dim=1)
             trainScore  = torch.sum(y_out == y_trainLabels).item()
             trainAcc    = trainScore / n_train
-            print("Train acc              : %s" % str(trainAcc))
+            #print("Train acc              : %s" % str(trainAcc))
             # ------------------------------------------------------- #
             # * ----- * ----- * ----- * ----- * ----- * ----- * ----- *
             # ------------------------------------------------------- #
@@ -189,7 +193,7 @@ def main():
                                     x       = x_unseenFeatures,
                                     y       = y_unseenLabels,
                                     vec     = unseenVectors)
-            print("Zero-Shot acc          : %s" % str(zslAcc))
+            #print("Zero-Shot acc          : %s" % str(zslAcc))
             # ------------------------------------------------------- #
             # * ----- * ----- * ----- * ----- * ----- * ----- * ----- *
             # ------------------------------------------------------- #
@@ -198,7 +202,7 @@ def main():
                                     x       = x_seenFeatures,
                                     y       = y_genSeenLabels,
                                     vec     = allVectors)
-            print("Generalized Seen acc   : %s" % str(gSeenAcc))
+            #print("Generalized Seen acc   : %s" % str(gSeenAcc))
             # ------------------------------------------------------- #
             # * ----- * ----- * ----- * ----- * ----- * ----- * ----- *
             # ------------------------------------------------------- #
@@ -207,15 +211,30 @@ def main():
                                     x       = x_unseenFeatures,
                                     y       = y_genUnseenLabels,
                                     vec     = allVectors)
-            print("Generalized Unseen acc : %s" % str(gUnseenAcc))
+            #print("Generalized Unseen acc : %s" % str(gUnseenAcc))
             # ------------------------------------------------------- #
             # * ----- * ----- * ----- * ----- * ----- * ----- * ----- *
             # ------------------------------------------------------- #
             # GENERALIZED ZERO-SHOT ACCURACY
-            hScore = (2 * gSeenAcc * gUnseenAcc) / (gSeenAcc + gUnseenAcc)
-            print("H-Score                : %s" % str(hScore))
+            if gSeenAcc + gUnseenAcc == 0.:
+                hScore = 0.
+            else:
+                hScore = (2 * gSeenAcc * gUnseenAcc) / (gSeenAcc + gUnseenAcc)
+            #print("H-Score                : %s" % str(hScore))
             # ------------------------------------------------------- #
-            print("##" * 25)
+            #print("##" * 25)
+
+            if hScore > max_hScore:
+                max_zslAcc      = zslAcc
+                max_gSeenAcc    = gSeenAcc
+                max_gUnseenAcc  = gUnseenAcc
+                max_hScore      = hScore
+
+    print("Zsl Acc: %.5s\tGen Seen Acc: %.5s\tGen Unseen Acc: %.5s\t\033[1mH-Score: %.5s\033[0m" \
+          % (str(max_zslAcc), \
+             str(max_gSeenAcc), \
+             str(max_gUnseenAcc), \
+             str(max_hScore)))
 
     return
 

@@ -136,8 +136,14 @@ def main():
     trainvalData    = TensorDataset(x_trainvalFeatures, y_trainvalLabels)
     trainvalLoader  = DataLoader(trainvalData, batch_size=batch_size, shuffle=True)
 
-    # *************************************************************************************************************** #
-    # *************************************************************************************************************** #
+    # **************************************************************************************************************** #
+    #                                            ATTRIBUTE LABEL EMBEDDING                                             #
+    # **************************************************************************************************************** #
+
+    max_zslAcc      = float('-inf')
+    max_gSeenAcc    = float('-inf')
+    max_gUnseenAcc  = float('-inf')
+    max_hScore      = float('-inf')
 
     # -------------------- #
     #       TRAINING       #
@@ -146,25 +152,23 @@ def main():
     for epochID in range(n_epoch):
 
         model.train()       # <-- Train Mode On
-        runningTrainvalLoss = 0.
+        running_trainval_loss = 0.
 
-        for idx, (x, y) in enumerate(trainvalLoader):
-
-            trainvalLoss            = 0.
+        for x, y in trainvalLoader:
 
             y_out           = model(x, seenVectors)
-            trainvalLoss    += criterion(y_out, y)
+            trainval_loss   = criterion(y_out, y)
 
-            optimizer.zero_grad()
-            trainvalLoss.backward()     # <-- calculate gradients
+            optimizer.zero_grad()       # <-- set gradients to zero
+            trainval_loss.backward()    # <-- calculate gradients
             optimizer.step()            # <-- update weights
 
-            runningTrainvalLoss += trainvalLoss.item()
+            running_trainval_loss += trainval_loss.item()
 
         # ---------------------- #
         #       PRINT LOSS       #
         # ---------------------- #
-        print("%s\tTrain Loss: %s" % (str(epochID + 1), str(runningTrainvalLoss / n_train)))
+        print("%s\tTrain Loss: %s" % (str(epochID + 1), str(running_trainval_loss / n_train)))
 
         if (epochID + 1) % __C.INFO_EPOCH == 0:
 
@@ -213,10 +217,28 @@ def main():
             # * ----- * ----- * ----- * ----- * ----- * ----- * ----- *
             # ------------------------------------------------------- #
             # GENERALIZED ZERO-SHOT ACCURACY
-            hScore = (2 * gSeenAcc * gUnseenAcc) / (gSeenAcc + gUnseenAcc)
+            if gSeenAcc + gUnseenAcc == 0.:
+                hScore = 0.
+            else:
+                hScore = (2 * gSeenAcc * gUnseenAcc) / (gSeenAcc + gUnseenAcc)
             print("H-Score                : %s" % str(hScore))
             # ------------------------------------------------------- #
+
+            if hScore > max_hScore:
+                max_zslAcc      = zslAcc
+                max_gSeenAcc    = gSeenAcc
+                max_gUnseenAcc  = gUnseenAcc
+                max_hScore      = hScore
+                torch.save(model, 'model/ale.pt')
+                print("ALE is saved.")
+
             print("##" * 25)
+
+    print("Zsl Acc: %.5s\tGen Seen Acc: %.5s\tGen Unseen Acc: %.5s\t\033[1mH-Score: %.5s\033[0m" \
+          % (str(max_zslAcc), \
+             str(max_gSeenAcc), \
+             str(max_gUnseenAcc), \
+             str(max_hScore)))
 
     return
 

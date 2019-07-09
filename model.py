@@ -29,7 +29,7 @@ class Network(torch.nn.Module):
     def forward(self, imageFeatures, classVectors):
 
         imageFeatures   = self.wHidden1(imageFeatures)
-        out             = torch.nn.Softmax(dim=1)(torch.matmul(imageFeatures, torch.t(classVectors)))
+        out             = torch.matmul(imageFeatures, torch.t(classVectors))
 
         return out
 

@@ -1,5 +1,7 @@
-# attribute-label-embedding
+# attribute-label-embedding-old
 An Implementation of Attribute Label Embedding (ALE) method for Zero-Shot Learning.   
+
+### Please see (!!!): https://github.com/cetinsamet/attribute-label-embedding
   
 There are 32 classes; 20 training classes + 12 test classes.    
 
